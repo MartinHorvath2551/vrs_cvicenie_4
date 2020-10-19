@@ -23,7 +23,6 @@
 #include "assignment.h"
 
 void SystemClock_Config(void);
-uint8_t check_button_state(GPIO_TypeDef* PORT, uint8_t PIN);
 
 uint8_t switch_state = 0;
 
@@ -52,9 +51,10 @@ int main(void)
 
   	  //type your code for EXTI configuration (priority, enable EXTI, setup EXTI for input pin, trigger edge) here:
 
-  	  	  NVIC_SetPriority(EXTI3_IRQn, 2);
-    	  NVIC_EnableIRQ(EXTI3_IRQn);
+  	  	  NVIC_SetPriority(EXTI4_IRQn, 2);
+    	  NVIC_EnableIRQ(EXTI4_IRQn);
 
+    	  SYSCFG->EXTICR[1] |= (1 << 0U);
       /*set EXTI source PB4*/
     	  EXTI->IMR |= EXTI_IMR_MR4;
 
@@ -141,6 +141,66 @@ void SystemClock_Config(void)
 uint8_t checkButtonState(GPIO_TypeDef* PORT, uint8_t PIN, uint8_t edge, uint8_t samples_window, uint8_t samples_required)
 {
 	  //type your code for "checkButtonState" implementation here:
+
+	uint8_t button_state = 0;
+
+	if(edge == TRIGGER_RISE)
+	{
+		//zistit "samples_window" krat za sebou ci je iny stav od "edge" ak "samples_required" krat je opacny stav, tak retunuj 1 inak 0;
+
+		for(int i=0; i<samples_window ;i++)
+		{
+			if((PORT->IDR & (1 << PIN)))/*LL_GPIO_IsInputPinReset(PORT, PIN)*/
+			{
+				button_state++;
+			}
+			else
+			{
+				button_state=0;
+			}
+
+		}
+
+		if(button_state>=samples_required)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+
+
+	}
+	else if(edge == TRIGGER_FALL)
+	{
+
+		for(int i=0;i<samples_window;i++)
+		{
+			if(!(PORT->IDR & (1 << PIN)))/*LL_GPIO_IsInputPinSet(PORT, PIN)*/
+			{
+				button_state++;
+			}
+			else
+			{
+				button_state=0;
+			}
+
+		}
+
+		if(button_state>=samples_required)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+
+
+	}
+
+	return 0;
 }
 
 

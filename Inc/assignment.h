@@ -15,9 +15,10 @@
 #define		GPIO_PIN_BUTTON					4
 
 // defines for input port used by LED
+/*
 #define		GPIO_PORT_LED					GPIOA
 #define		GPIO_PIN_LED					4
-
+*/
 // defines for "checkButtonState"
 #define		TRIGGER_RISE					0
 #define		TRIGGER_FALL					1
